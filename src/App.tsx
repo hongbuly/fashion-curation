@@ -1,8 +1,16 @@
 import styled, { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 import { useEffect, useState } from "react";
-import { auth } from "./firebase";
+import { db } from "./firebase";
 import { MdOutlineSearch } from "react-icons/md";
+import Menu from "./components/menu";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+
+export interface IMenu {
+  id: string;
+  title: string;
+  createdAt: number;
+}
 
 const GlobalStyles = createGlobalStyle`
   ${reset};
@@ -66,29 +74,74 @@ const ScrollMenu = styled.div`
   scrollbar-width: none;
 `;
 
-const Menu = styled.div`
-  display: inline-block;
-  width: auto;
+const ScrollView = styled.div`
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: nowrap;
+`;
+
+const BottomWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const SubscribeText = styled.p`
+  color: #393939;
+  font-size: 14px;
+  margin-top: 20px;
+`;
+
+const EmailText = styled.input`
   height: 30px;
-  border-bottom: 1px solid black;
-  background: #fff;
-  font-size: 16px;
-  line-height: 30px;
-  text-align: center;
-  margin-left: 50px;
-  margin-right: 50px;
+  width: 300px;
+  border: 1px solid black;
+  margin-top: 10px;
+  padding: 5px 10px;
+`;
+
+const Subscribe = styled.button`
+  border: 1px solid black;
+  border-radius: 10px;
+  background-color: transparent;
+  font-size: 14px;
+  align-self: center;
+  margin-top: 10px;
+  padding: 10px 30px;
 `;
 
 function App() {
+  const [menus, setMenu] = useState<IMenu[]>([]);
   const [isLoading, setLoading] = useState(true);
+
   const init = async () => {
     //wait for firebase
-    await auth.authStateReady();
     setLoading(false);
   };
+
+  const fetchMenu = async () => {
+    const menusQuery = query(
+      collection(db, "menus"),
+      orderBy("createdAt", "desc")
+    );
+    const snapshot = await getDocs(menusQuery);
+    const menus = snapshot.docs.map((doc) => {
+      const { title, createdAt } = doc.data();
+      return {
+        id: doc.id,
+        title,
+        createdAt,
+      };
+    });
+
+    setMenu(menus);
+  };
+
   useEffect(() => {
     init();
+    fetchMenu();
   }, []);
+
   return (
     <Wrapper>
       <GlobalStyles />
@@ -100,15 +153,18 @@ function App() {
         </Button>
       </AppBar>
       <ScrollMenu>
-        <Menu>24 fw</Menu>
-        <Menu>24 ss</Menu>
-        <Menu>23 fw</Menu>
-        <Menu>23 ss</Menu>
-        <Menu>22 fw</Menu>
-        <Menu>22 ss</Menu>
-        <Menu>21 fw</Menu>
-        <Menu>21 ss</Menu>
+        {menus.map((menu) => (
+          <Menu key={menu.id} {...menu} />
+        ))}
       </ScrollMenu>
+      <ScrollView></ScrollView>
+      <BottomWrapper>
+        <SubscribeText>
+          이메일을 입력하고, 새로운 글을 놓치지 마세요.
+        </SubscribeText>
+        <EmailText type="text" placeholder="example@example.com" />
+        <Subscribe>뉴스레터 구독하기</Subscribe>
+      </BottomWrapper>
     </Wrapper>
   );
 }
