@@ -5,6 +5,8 @@ import { db } from "./firebase";
 import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import SSWM2024 from "./components/ss_wm2024";
+import LoadingScreen from "./components/loading-screen";
 
 export interface IMenu {
   id: string;
@@ -84,6 +86,13 @@ const BottomWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 50px;
+`;
+
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const SubscribeText = styled.p`
@@ -157,14 +166,22 @@ function App() {
           <Menu key={menu.id} {...menu} />
         ))}
       </ScrollMenu>
-      <ScrollView></ScrollView>
-      <BottomWrapper>
-        <SubscribeText>
-          이메일을 입력하고, 새로운 글을 놓치지 마세요.
-        </SubscribeText>
-        <EmailText type="text" placeholder="example@example.com" />
-        <Subscribe>뉴스레터 구독하기</Subscribe>
-      </BottomWrapper>
+      <ScrollView>
+        {isLoading ? (
+          <LoadingScreen />
+        ) : (
+          <ContentWrapper>
+            <SSWM2024 />
+          </ContentWrapper>
+        )}
+        <BottomWrapper>
+          <SubscribeText>
+            이메일을 입력하고, 새로운 글을 놓치지 마세요.
+          </SubscribeText>
+          <EmailText type="text" placeholder="example@example.com" />
+          <Subscribe>뉴스레터 구독하기</Subscribe>
+        </BottomWrapper>
+      </ScrollView>
     </Wrapper>
   );
 }

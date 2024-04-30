@@ -12,6 +12,7 @@ const Wrapper = styled.div`
   text-align: center;
   margin-left: 100px;
   margin-right: 100px;
+  font-size: 10px;
 `;
 
 export default function Menu({ title }: IMenu) {
