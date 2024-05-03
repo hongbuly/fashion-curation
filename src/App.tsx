@@ -1,6 +1,6 @@
 import styled, { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "./firebase";
 import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
@@ -63,6 +63,10 @@ const Button = styled.button`
   padding-right: 5px;
   align-self: center;
   margin-right: 5px;
+  color: #0000009b;
+  &:hover {
+    color: black;
+  }
 `;
 
 const ScrollMenu = styled.div`
@@ -119,11 +123,13 @@ const Subscribe = styled.button`
   align-self: center;
   margin-top: 10px;
   padding: 10px 30px;
+  color: black;
 `;
 
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
   const [selectMenu, setSelectMenu] = useState("0");
+  const scrollViewRef = useRef<HTMLDivElement>(null);
 
   const fetchMenu = async () => {
     const menusQuery = query(
@@ -152,6 +158,19 @@ function App() {
 
   const handleMenuClick = (menuId: string) => {
     setSelectMenu(menuId);
+
+    const selectedMenuIndex = menus.findIndex((menu) => menu.id === menuId);
+    if (scrollViewRef.current?.scrollWidth) {
+      const scrollLeft =
+        (scrollViewRef.current?.scrollWidth / menus.length) * selectedMenuIndex;
+      if (scrollViewRef.current && typeof scrollLeft === "number") {
+        if (scrollLeft > 170) {
+          scrollViewRef.current.scrollLeft = scrollLeft - 200;
+        } else {
+          scrollViewRef.current.scrollLeft = 0;
+        }
+      }
+    }
   };
 
   return (
@@ -164,7 +183,7 @@ function App() {
           <MdOutlineSearch />
         </Button>
       </AppBar>
-      <ScrollMenu>
+      <ScrollMenu ref={scrollViewRef}>
         {menus.map((menu) => (
           <Menu
             key={menu.id}

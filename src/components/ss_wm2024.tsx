@@ -47,7 +47,7 @@ const GroupImage = styled.div`
 `;
 
 const Image = styled.img`
-  width: 500px;
+  width: 450px;
 
   @media screen and (min-width: 755px) {
     width: 600px;
@@ -81,14 +81,14 @@ const ImgSliderBox = styled.div`
 
 const ImgSlider = styled.div`
   overflow-x: hidden;
-  max-width: 500px;
+  max-width: 450px;
   min-width: 280px;
   width: max-content;
 `;
 
 const SliderButtonBox = styled.div`
   position: absolute;
-  width: 500px;
+  width: 450px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -96,11 +96,15 @@ const SliderButtonBox = styled.div`
 `;
 
 const SliderButton = styled.button`
-  background-color: rgba(154, 154, 154, 0.5);
-  color: white;
+  background-color: transparent;
+  color: #ffffffba;
   border: none;
   border-radius: 50%;
   font-size: 30px;
+  margin: 0px 10px;
+  &:hover {
+    color: white;
+  }
 `;
 
 const ImgListBox = styled.div`
