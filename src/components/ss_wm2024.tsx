@@ -1,16 +1,61 @@
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import LoadingScreen from "./loading-screen";
+import { getDownloadURL, listAll, ref } from "firebase/storage";
+import { storage } from "../firebase";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+
+export interface Urls {
+  name: string;
+  url: string;
+}
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin: 30px 0px;
+  margin: 50px 0px;
   width: 80%;
-  background-color: grey;
+  @media screen and (max-width: 755px) {
+    width: 100%;
+  }
 `;
 
-const Box = styled.div`
+const UpNextBox = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: center;
+  @media screen and (min-width: 1200px) {
+    flex-direction: row;
+  }
+`;
+
+const ImageBox = styled.div`
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  @media screen and (max-width: 755px) {
+    display: flex;
+  }
+`;
+
+const GroupImage = styled.div`
+  display: none;
+  justify-content: center;
+  @media screen and (min-width: 755px) {
+    display: flex;
+  }
+`;
+
+const Image = styled.img`
+  width: 500px;
+
+  @media screen and (min-width: 755px) {
+    width: 600px;
+  }
+`;
+
+const ImageComment = styled.p`
+  font-size: 10px;
 `;
 
 const TextBox = styled.div`
@@ -19,39 +64,145 @@ const TextBox = styled.div`
   padding: 30px;
 `;
 
-const ImageBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Image = styled.img`
-  width: 100%;
-`;
-
-const ImageComment = styled.p`
-  font-size: 10px;
-`;
-
 const Text = styled.p`
   width: inherit;
   font-family: "Nanum Myeongjo", serif;
   white-space: pre-wrap;
-  font-size: 10px;
+  font-size: 17px;
+`;
+
+const ImgSliderBox = styled.div`
+  display: none;
+  position: relative;
+  @media screen and (max-width: 755px) {
+    display: block;
+  }
+`;
+
+const ImgSlider = styled.div`
+  overflow-x: hidden;
+  max-width: 500px;
+  min-width: 280px;
+  width: max-content;
+`;
+
+const SliderButtonBox = styled.div`
+  position: absolute;
+  width: 500px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  top: 50%;
+`;
+
+const SliderButton = styled.button`
+  background-color: rgba(154, 154, 154, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 30px;
+`;
+
+const ImgListBox = styled.div`
+  display: flex;
 `;
 
 export default function SSWM2024() {
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  const [isLoading, setLoading] = useState(true);
+  const [imageList, setImageList] = useState<Urls[]>([]);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const [style, setStyle] = useState({
+    transform: `translateX(-${currentImgIndex}00%)`,
+    transition: `all 0.4s ease-in-out`,
+  });
+
+  const nextSlide = () => {
+    const index = currentImgIndex + 1 > 1 ? 0 : currentImgIndex + 1;
+    setCurrentImgIndex(index);
+    setStyle({
+      transform: `translateX(-${index}00%)`,
+      transition: `all 0.4s ease-in-out`,
+    });
+  };
+
+  const prevSlide = () => {
+    const index = currentImgIndex - 1 < 0 ? 1 : currentImgIndex - 1;
+    setCurrentImgIndex(index);
+    setStyle({
+      transform: `translateX(-${index}00%)`,
+      transition: `all 0.4s ease-in-out`,
+    });
+  };
+
+  const init = () => {
+    const allImage = ref(storage, "ss_wm2024/");
+
+    listAll(allImage).then(async (res) => {
+      const { items } = res;
+      const _urls = await Promise.all(
+        items.map((item) => getDownloadURL(item))
+      );
+
+      const combine: Urls[] = [];
+
+      for (let i = 0; i < items.length; i++) {
+        combine.push({ name: items[i].name, url: _urls[i] });
+      }
+
+      setImageList(combine);
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    init();
+  });
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Wrapper>
-      <Box>
-        <ImageBox>
-          <Image src="https://firebasestorage.googleapis.com/v0/b/fashion-curation.appspot.com/o/ss_wm2024%2Flook01-driesvannoten.png?alt=media&token=6c60dd22-56c3-4149-8aa3-2042149f0092" />
-          <ImageComment>24 ss women - dries van noten</ImageComment>
-        </ImageBox>
-        <ImageBox>
-          <Image src="https://firebasestorage.googleapis.com/v0/b/fashion-curation.appspot.com/o/ss_wm2024%2Flook02-dior.png?alt=media&token=27e511ef-cbb0-4c58-b869-3a98d7895f7d" />
-          <ImageComment>24 ss women - dior</ImageComment>
-        </ImageBox>
+      <UpNextBox>
+        <GroupImage>
+          <Image
+            src={imageList.find((item) => item.name.includes("group01"))!.url}
+          />
+        </GroupImage>
+        <ImgSliderBox>
+          <ImgSlider>
+            <ImgListBox ref={sliderRef} style={style}>
+              <ImageBox>
+                <Image
+                  src={
+                    imageList.find((item) => item.name.includes("look01"))!.url
+                  }
+                />
+                <ImageComment>24 ss women - dries van noten</ImageComment>
+              </ImageBox>
+              <ImageBox>
+                <Image
+                  src={
+                    imageList.find((item) => item.name.includes("look02"))!.url
+                  }
+                />
+                <ImageComment>24 ss women - dior</ImageComment>
+              </ImageBox>
+            </ImgListBox>
+          </ImgSlider>
+
+          <SliderButtonBox>
+            <SliderButton onClick={prevSlide}>
+              <IoIosArrowBack />
+            </SliderButton>
+            <SliderButton onClick={nextSlide}>
+              <IoIosArrowForward />
+            </SliderButton>
+          </SliderButtonBox>
+        </ImgSliderBox>
         <TextBox>
           <Text>
             {" "}
@@ -73,7 +224,7 @@ export default function SSWM2024() {
             세련되게 활용을 많이 할 수 있을 것이다.
           </Text>
         </TextBox>
-      </Box>
+      </UpNextBox>
     </Wrapper>
   );
 }

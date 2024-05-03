@@ -6,12 +6,13 @@ import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import SSWM2024 from "./components/ss_wm2024";
-import LoadingScreen from "./components/loading-screen";
 
 export interface IMenu {
   id: string;
   title: string;
   createdAt: number;
+  selected: boolean;
+  onClick: () => void;
 }
 
 const GlobalStyles = createGlobalStyle`
@@ -67,6 +68,7 @@ const Button = styled.button`
 const ScrollMenu = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
+  height: 60px;
   white-space: nowrap;
   font-size: 0;
   &::-webkit-scrollbar {
@@ -121,12 +123,7 @@ const Subscribe = styled.button`
 
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
-  const [isLoading, setLoading] = useState(true);
-
-  const init = async () => {
-    //wait for firebase
-    setLoading(false);
-  };
+  const [selectMenu, setSelectMenu] = useState("0");
 
   const fetchMenu = async () => {
     const menusQuery = query(
@@ -140,16 +137,22 @@ function App() {
         id: doc.id,
         title,
         createdAt,
+        selected: false,
+        onClick: () => {},
       };
     });
 
     setMenu(menus);
+    setSelectMenu(menus[0].id);
   };
 
   useEffect(() => {
-    init();
     fetchMenu();
   }, []);
+
+  const handleMenuClick = (menuId: string) => {
+    setSelectMenu(menuId);
+  };
 
   return (
     <Wrapper>
@@ -163,17 +166,18 @@ function App() {
       </AppBar>
       <ScrollMenu>
         {menus.map((menu) => (
-          <Menu key={menu.id} {...menu} />
+          <Menu
+            key={menu.id}
+            {...menu}
+            onClick={() => handleMenuClick(menu.id)}
+            selected={menu.id === selectMenu}
+          />
         ))}
       </ScrollMenu>
       <ScrollView>
-        {isLoading ? (
-          <LoadingScreen />
-        ) : (
-          <ContentWrapper>
-            <SSWM2024 />
-          </ContentWrapper>
-        )}
+        <ContentWrapper>
+          <SSWM2024 />
+        </ContentWrapper>
         <BottomWrapper>
           <SubscribeText>
             이메일을 입력하고, 새로운 글을 놓치지 마세요.

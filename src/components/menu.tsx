@@ -1,20 +1,27 @@
 import styled from "styled-components";
 import { IMenu } from "../App";
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ selected: boolean }>`
   display: inline-block;
   width: auto;
   height: 30px;
-  border-bottom: 1px solid black;
+  border-bottom: ${(props) =>
+    props.selected ? "3px solid black" : "1px solid grey"};
   background: #fff;
   font-size: 16px;
   line-height: 30px;
   text-align: center;
   margin-left: 100px;
   margin-right: 100px;
-  font-size: 10px;
+  font-size: 15px;
 `;
 
-export default function Menu({ title }: IMenu) {
-  return <Wrapper>{title}</Wrapper>;
-}
+const Menu: React.FC<IMenu> = ({ title, selected, onClick }) => {
+  return (
+    <Wrapper onClick={onClick} selected={selected}>
+      {title}
+    </Wrapper>
+  );
+};
+
+export default Menu;
