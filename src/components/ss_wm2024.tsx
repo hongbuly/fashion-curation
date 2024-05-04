@@ -99,7 +99,6 @@ const SliderButton = styled.button`
   background-color: transparent;
   color: #ffffffba;
   border: none;
-  border-radius: 50%;
   font-size: 30px;
   margin: 0px 10px;
   &:hover {
@@ -116,26 +115,31 @@ export default function SSWM2024() {
 
   const [isLoading, setLoading] = useState(true);
   const [imageList, setImageList] = useState<Urls[]>([]);
-  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const [currentImgIndex, setCurrentImgIndex] = useState(1);
   const [style, setStyle] = useState({
     transform: `translateX(-${currentImgIndex}00%)`,
     transition: `all 0.4s ease-in-out`,
   });
 
+  // For Mobile
+  const mref = useRef<HTMLDivElement>(null);
+  const [touch, setTouch] = useState({
+    start: 0,
+    end: 0,
+  });
+
   const nextSlide = () => {
-    const index = currentImgIndex + 1 > 1 ? 0 : currentImgIndex + 1;
-    setCurrentImgIndex(index);
+    setCurrentImgIndex(currentImgIndex + 1);
     setStyle({
-      transform: `translateX(-${index}00%)`,
+      transform: `translateX(-${currentImgIndex + 1}00%)`,
       transition: `all 0.4s ease-in-out`,
     });
   };
 
   const prevSlide = () => {
-    const index = currentImgIndex - 1 < 0 ? 1 : currentImgIndex - 1;
-    setCurrentImgIndex(index);
+    setCurrentImgIndex(currentImgIndex - 1);
     setStyle({
-      transform: `translateX(-${index}00%)`,
+      transform: `translateX(-${currentImgIndex - 1}00%)`,
       transition: `all 0.4s ease-in-out`,
     });
   };
@@ -162,7 +166,24 @@ export default function SSWM2024() {
 
   useEffect(() => {
     init();
-  });
+    if (currentImgIndex === 0) {
+      setCurrentImgIndex(2);
+      setTimeout(function () {
+        setStyle({
+          transform: `translateX(-200%)`,
+          transition: `0ms`,
+        });
+      }, 500);
+    } else if (currentImgIndex === 3) {
+      setCurrentImgIndex(1);
+      setTimeout(function () {
+        setStyle({
+          transform: `translateX(-100%)`,
+          transition: `0ms`,
+        });
+      }, 500);
+    }
+  }, [currentImgIndex, imageList.length]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -176,9 +197,47 @@ export default function SSWM2024() {
             src={imageList.find((item) => item.name.includes("group01"))!.url}
           />
         </GroupImage>
-        <ImgSliderBox>
+        <ImgSliderBox
+          onTouchStart={(e) => {
+            setTouch({
+              ...touch,
+              start: e.touches[0].pageX,
+            });
+          }}
+          onTouchMove={(e) => {
+            if (mref?.current) {
+              const current = mref.current.clientWidth * currentImgIndex;
+              const result =
+                -current + (e.targetTouches[0].pageX - touch.start);
+              setStyle({
+                transform: `translate3d(${result}px, 0px, 0px)`,
+                transition: `0ms`,
+              });
+            }
+          }}
+          onTouchEnd={(e) => {
+            const end = e.changedTouches[0].pageX;
+            if (touch.start > end && touch.start - end > 50) {
+              nextSlide();
+            } else if (end - touch.start > 50) {
+              prevSlide();
+            }
+            setTouch({
+              ...touch,
+              end,
+            });
+          }}
+        >
           <ImgSlider>
             <ImgListBox ref={sliderRef} style={style}>
+              <ImageBox>
+                <Image
+                  src={
+                    imageList.find((item) => item.name.includes("look02"))!.url
+                  }
+                />
+                <ImageComment>24 ss women - dior</ImageComment>
+              </ImageBox>
               <ImageBox>
                 <Image
                   src={
@@ -194,6 +253,14 @@ export default function SSWM2024() {
                   }
                 />
                 <ImageComment>24 ss women - dior</ImageComment>
+              </ImageBox>
+              <ImageBox>
+                <Image
+                  src={
+                    imageList.find((item) => item.name.includes("look01"))!.url
+                  }
+                />
+                <ImageComment>24 ss women - dries van noten</ImageComment>
               </ImageBox>
             </ImgListBox>
           </ImgSlider>

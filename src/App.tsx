@@ -165,7 +165,8 @@ function App() {
         (scrollViewRef.current?.scrollWidth / menus.length) * selectedMenuIndex;
       if (scrollViewRef.current && typeof scrollLeft === "number") {
         if (scrollLeft > 170) {
-          scrollViewRef.current.scrollLeft = scrollLeft - 200;
+          scrollViewRef.current.scrollLeft =
+            scrollLeft - scrollViewRef.current?.scrollWidth / 4;
         } else {
           scrollViewRef.current.scrollLeft = 0;
         }
