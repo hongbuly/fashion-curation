@@ -128,7 +128,7 @@ const Subscribe = styled.button`
 
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
-  const [selectMenu, setSelectMenu] = useState("0");
+  const [selectMenu, setSelectMenu] = useState("24 ss women");
   const scrollViewRef = useRef<HTMLDivElement>(null);
 
   const fetchMenu = async () => {
@@ -149,24 +149,26 @@ function App() {
     });
 
     setMenu(menus);
-    setSelectMenu(menus[0].id);
+    setSelectMenu(menus[2].title);
   };
 
   useEffect(() => {
     fetchMenu();
   }, []);
 
-  const handleMenuClick = (menuId: string) => {
-    setSelectMenu(menuId);
+  const handleMenuClick = (menuTitle: string) => {
+    setSelectMenu(menuTitle);
 
-    const selectedMenuIndex = menus.findIndex((menu) => menu.id === menuId);
+    const selectedMenuIndex = menus.findIndex(
+      (menu) => menu.title === menuTitle
+    );
     if (scrollViewRef.current?.scrollWidth) {
       const scrollLeft =
         (scrollViewRef.current?.scrollWidth / menus.length) * selectedMenuIndex;
       if (scrollViewRef.current && typeof scrollLeft === "number") {
         if (scrollLeft > 170) {
           scrollViewRef.current.scrollLeft =
-            scrollLeft - scrollViewRef.current?.scrollWidth / 4;
+            scrollLeft - scrollViewRef.current?.scrollWidth / 6;
         } else {
           scrollViewRef.current.scrollLeft = 0;
         }
@@ -189,14 +191,14 @@ function App() {
           <Menu
             key={menu.id}
             {...menu}
-            onClick={() => handleMenuClick(menu.id)}
-            selected={menu.id === selectMenu}
+            onClick={() => handleMenuClick(menu.title)}
+            selected={menu.title === selectMenu}
           />
         ))}
       </ScrollMenu>
       <ScrollView>
         <ContentWrapper>
-          <SSWM2024 />
+          <SSWM2024 title={selectMenu} />
         </ContentWrapper>
         <BottomWrapper>
           <SubscribeText>
