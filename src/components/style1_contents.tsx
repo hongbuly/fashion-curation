@@ -16,6 +16,7 @@ const UpNextBox = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 20%;
   @media screen and (min-width: 1200px) {
     flex-direction: row;
   }
@@ -146,7 +147,7 @@ export default function Style1Contents({
   };
 
   const init = async () => {
-    const contentsQuery = doc(db, "contents", title);
+    const contentsQuery = doc(db, title, index.toString());
     const snapshot = await getDoc(contentsQuery);
     if (snapshot.exists()) {
       const contentData = snapshot.data();
@@ -203,6 +204,91 @@ export default function Style1Contents({
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (index % 2 == 0) {
+    return (
+      <UpNextBox>
+        <TextBox>
+          <Text>
+            <div dangerouslySetInnerHTML={{ __html: contents }} />
+          </Text>
+        </TextBox>
+        <GroupImage>
+          <Image src={imageListGroup[0].url} />
+        </GroupImage>
+        <ImgSliderBox
+          onTouchStart={(e) => {
+            setTouch({
+              ...touch,
+              start: e.touches[0].pageX,
+            });
+          }}
+          onTouchMove={(e) => {
+            if (mref?.current) {
+              const current = mref.current.clientWidth * currentImgIndex;
+              const result =
+                -current + (e.targetTouches[0].pageX - touch.start);
+              setStyle({
+                transform: `translate3d(${result}px, 0px, 0px)`,
+                transition: `0ms`,
+              });
+            }
+          }}
+          onTouchEnd={(e) => {
+            const end = e.changedTouches[0].pageX;
+            if (touch.start > end && touch.start - end > 50) {
+              nextSlide();
+            } else if (end - touch.start > 50) {
+              prevSlide();
+            }
+            setTouch({
+              ...touch,
+              end,
+            });
+          }}
+        >
+          <ImgSlider>
+            <ImgListBox ref={sliderRef} style={style}>
+              <ImageBox>
+                <Image src={imageList[imageList.length - 1].url} />
+                <ImageComment>
+                  24 ss women -{" "}
+                  {
+                    imageList[imageList.length - 1].name
+                      .split("-")[2]
+                      .split(".")[0]
+                  }
+                </ImageComment>
+              </ImageBox>
+              {imageList.map((image) => (
+                <ImageBox key={image.name}>
+                  <Image src={image.url} />
+                  <ImageComment>
+                    24 ss women - {image.name.split("-")[2].split(".")[0]}
+                  </ImageComment>
+                </ImageBox>
+              ))}
+              <ImageBox>
+                <Image src={imageList[0].url} />
+                <ImageComment>
+                  24 ss women - {imageList[0].name.split("-")[2].split(".")[0]}
+                </ImageComment>
+              </ImageBox>
+            </ImgListBox>
+          </ImgSlider>
+
+          <SliderButtonBox>
+            <SliderButton onClick={prevSlide}>
+              <IoIosArrowBack />
+            </SliderButton>
+            <SliderButton onClick={nextSlide}>
+              <IoIosArrowForward />
+            </SliderButton>
+          </SliderButtonBox>
+        </ImgSliderBox>
+      </UpNextBox>
+    );
   }
 
   return (

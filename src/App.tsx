@@ -5,7 +5,7 @@ import { db } from "./firebase";
 import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import SSWM2024 from "./components/ss_wm2024";
+import Contents from "./components/contents";
 
 export interface IMenu {
   id: string;
@@ -72,7 +72,7 @@ const Button = styled.button`
 const ScrollMenu = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
-  height: 60px;
+  height: 150px;
   white-space: nowrap;
   font-size: 0;
   &::-webkit-scrollbar {
@@ -198,7 +198,7 @@ function App() {
       </ScrollMenu>
       <ScrollView>
         <ContentWrapper>
-          <SSWM2024 title={selectMenu} />
+          <Contents title={selectMenu} />
         </ContentWrapper>
         <BottomWrapper>
           <SubscribeText>
