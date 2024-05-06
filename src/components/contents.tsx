@@ -1,5 +1,8 @@
 import styled from "styled-components";
 import Style1Contents from "./style1_contents";
+import { collection, getDocs, query } from "firebase/firestore";
+import { db } from "./../firebase";
+import { useEffect, useState } from "react";
 
 const Wrapper = styled.div`
   display: flex;
@@ -20,15 +23,25 @@ const Text = styled.p`
 `;
 
 export default function Contents({ title }: { title: string }) {
-  if (title == "24 ss women")
-    return (
-      <Wrapper>
-        <Style1Contents title={title} index={1} />
-        <Style1Contents title={title} index={2} />
-        <Style1Contents title={title} index={3} />
-      </Wrapper>
-    );
-  else
+  const [size, setSize] = useState(0);
+
+  const fetchContents = async () => {
+    const menusQuery = query(collection(db, title));
+    const snapshot = await getDocs(menusQuery);
+    const size = snapshot.size;
+    setSize(size);
+  };
+
+  useEffect(() => {
+    fetchContents();
+  }, []);
+
+  if (size != 0) {
+    const style1ContentsArray = Array.from({ length: size }, (_, index) => (
+      <Style1Contents key={index} title={title} index={index + 1} />
+    ));
+    return <Wrapper>{style1ContentsArray}</Wrapper>;
+  } else
     return (
       <Wrapper>
         <Text>
