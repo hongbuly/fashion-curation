@@ -34,7 +34,7 @@ const ImageBox = styled.div`
 const GroupImage = styled.div`
   display: none;
   justify-content: center;
-  @media screen and (min-width: 755px) {
+  @media screen and (min-width: 754px) {
     display: flex;
   }
 `;
@@ -42,7 +42,7 @@ const GroupImage = styled.div`
 const Image = styled.img`
   width: 450px;
 
-  @media screen and (min-width: 755px) {
+  @media screen and (min-width: 754px) {
     width: 600px;
   }
 `;
@@ -67,7 +67,7 @@ const Text = styled.p`
 const ImgSliderBox = styled.div`
   display: none;
   position: relative;
-  @media screen and (max-width: 755px) {
+  @media screen and (max-width: 754px) {
     display: block;
   }
 `;

@@ -4,8 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { db } from "./firebase";
 import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+} from "firebase/firestore";
 import Contents from "./components/contents";
+import { v4 as uuidv4 } from "uuid";
 
 export interface IMenu {
   id: string;
@@ -124,6 +132,10 @@ const Subscribe = styled.button`
   margin-top: 10px;
   padding: 10px 30px;
   color: black;
+  cursor: pointer;
+  &:active {
+    color: grey;
+  }
 `;
 
 function App() {
@@ -176,6 +188,22 @@ function App() {
     }
   };
 
+  const handleSubscribeClick = async () => {
+    const subscribe_text = document.getElementById("subscribe_text");
+    const emailElement = document.getElementById(
+      "email"
+    ) as HTMLInputElement | null;
+    const email = emailElement ? emailElement.value : "";
+
+    if (email != "") {
+      const emailId = uuidv4();
+      setDoc(doc(db, "emails", emailId), { email: email });
+      if (subscribe_text) {
+        subscribe_text.innerText = "이메일 구독이 되었습니다.";
+      }
+    }
+  };
+
   return (
     <Wrapper>
       <GlobalStyles />
@@ -201,11 +229,13 @@ function App() {
           <Contents title={selectMenu} />
         </ContentWrapper>
         <BottomWrapper>
-          <SubscribeText>
+          <SubscribeText id="subscribe_text">
             이메일을 입력하고, 새로운 글을 놓치지 마세요.
           </SubscribeText>
-          <EmailText type="text" placeholder="example@example.com" />
-          <Subscribe>뉴스레터 구독하기</Subscribe>
+          <EmailText id="email" type="text" placeholder="example@example.com" />
+          <Subscribe onClick={handleSubscribeClick}>
+            뉴스레터 구독하기
+          </Subscribe>
         </BottomWrapper>
       </ScrollView>
     </Wrapper>
