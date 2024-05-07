@@ -25,16 +25,16 @@ const Text = styled.p`
 export default function Contents({ title }: { title: string }) {
   const [size, setSize] = useState(0);
 
-  const fetchContents = async () => {
-    const menusQuery = query(collection(db, title));
-    const snapshot = await getDocs(menusQuery);
-    const size = snapshot.size;
-    setSize(size);
-  };
-
   useEffect(() => {
+    const fetchContents = async () => {
+      const menusQuery = query(collection(db, title));
+      const snapshot = await getDocs(menusQuery);
+      const size = snapshot.size;
+      setSize(size);
+    };
+
     fetchContents();
-  }, []);
+  }, [title]);
 
   if (size != 0) {
     const style1ContentsArray = Array.from({ length: size }, (_, index) => (

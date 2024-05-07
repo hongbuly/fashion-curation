@@ -146,43 +146,44 @@ export default function Style1Contents({
     });
   };
 
-  const init = async () => {
-    const contentsQuery = doc(db, title, index.toString());
-    const snapshot = await getDoc(contentsQuery);
-    if (snapshot.exists()) {
-      const contentData = snapshot.data();
-      const contentString = JSON.stringify(contentData)
-        .split('{"contents":"')[1]
-        .split('"}')[0];
-      setContents(contentString);
-    }
-
-    const allImage = ref(storage, title + "/");
-
-    listAll(allImage).then(async (res) => {
-      const { items } = res;
-      const _urls = await Promise.all(
-        items.map((item) => getDownloadURL(item))
-      );
-
-      const combine: Urls[] = [];
-      const combine_group: Urls[] = [];
-
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].name.includes(`group${index}`))
-          combine_group.push({ name: items[i].name, url: _urls[i] });
-        else if (items[i].name.includes(`g${index}`))
-          combine.push({ name: items[i].name, url: _urls[i] });
+  useEffect(() => {
+    const init = async () => {
+      const contentsQuery = doc(db, title, index.toString());
+      const snapshot = await getDoc(contentsQuery);
+      if (snapshot.exists()) {
+        const contentData = snapshot.data();
+        const contentString = JSON.stringify(contentData)
+          .split('{"contents":"')[1]
+          .split('"}')[0];
+        setContents(contentString);
       }
 
-      setImageList(combine);
-      setImageListGroup(combine_group);
-      setLoading(false);
-    });
-  };
+      const allImage = ref(storage, title + "/");
 
-  useEffect(() => {
+      listAll(allImage).then(async (res) => {
+        const { items } = res;
+        const _urls = await Promise.all(
+          items.map((item) => getDownloadURL(item))
+        );
+
+        const combine: Urls[] = [];
+        const combine_group: Urls[] = [];
+
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].name.includes(`group${index}`))
+            combine_group.push({ name: items[i].name, url: _urls[i] });
+          else if (items[i].name.includes(`g${index}`))
+            combine.push({ name: items[i].name, url: _urls[i] });
+        }
+
+        setImageList(combine);
+        setImageListGroup(combine_group);
+        setLoading(false);
+      });
+    };
+
     init();
+
     if (currentImgIndex === 0) {
       setCurrentImgIndex(imageList.length);
       setTimeout(function () {
@@ -200,7 +201,7 @@ export default function Style1Contents({
         });
       }, 500);
     }
-  }, [currentImgIndex]);
+  }, [currentImgIndex, imageList.length, index, title]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -246,7 +247,7 @@ export default function Style1Contents({
             <ImageBox>
               <Image src={imageList[imageList.length - 1].url} />
               <ImageComment>
-                24 ss women -{" "}
+                {title} -
                 {
                   imageList[imageList.length - 1].name
                     .split("-")[2]
@@ -258,14 +259,14 @@ export default function Style1Contents({
               <ImageBox key={image.name}>
                 <Image src={image.url} />
                 <ImageComment>
-                  24 ss women - {image.name.split("-")[2].split(".")[0]}
+                  {title} - {image.name.split("-")[2].split(".")[0]}
                 </ImageComment>
               </ImageBox>
             ))}
             <ImageBox>
               <Image src={imageList[0].url} />
               <ImageComment>
-                24 ss women - {imageList[0].name.split("-")[2].split(".")[0]}
+                {title} - {imageList[0].name.split("-")[2].split(".")[0]}
               </ImageComment>
             </ImageBox>
           </ImgListBox>
