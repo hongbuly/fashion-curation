@@ -151,11 +151,8 @@ export default function Style1Contents({
       const contentsQuery = doc(db, title, index.toString());
       const snapshot = await getDoc(contentsQuery);
       if (snapshot.exists()) {
-        const contentData = snapshot.data();
-        const contentString = JSON.stringify(contentData)
-          .split('{"contents":"')[1]
-          .split('"}')[0];
-        setContents(contentString);
+        const { contents } = snapshot.data();
+        setContents(contents);
       }
 
       const allImage = ref(storage, title + "/");
@@ -282,9 +279,7 @@ export default function Style1Contents({
         </SliderButtonBox>
       </ImgSliderBox>
       <TextBox>
-        <Text>
-          <div dangerouslySetInnerHTML={{ __html: contents }} />
-        </Text>
+        <Text dangerouslySetInnerHTML={{ __html: contents }}></Text>
       </TextBox>
     </UpNextBox>
   );

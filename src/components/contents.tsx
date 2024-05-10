@@ -24,13 +24,20 @@ const Text = styled.p`
 
 export default function Contents({ title }: { title: string }) {
   const [size, setSize] = useState(0);
+  const [message, setMessage] = useState(
+    "아직 작성중입니다. 이메일 구독을 하여 제일 먼저 글을 읽어보세요."
+  );
 
   useEffect(() => {
     const fetchContents = async () => {
-      const menusQuery = query(collection(db, title));
-      const snapshot = await getDocs(menusQuery);
-      const size = snapshot.size;
-      setSize(size);
+      try {
+        const menusQuery = query(collection(db, title));
+        const snapshot = await getDocs(menusQuery);
+        const size = snapshot.size;
+        setSize(size);
+      } catch (e) {
+        setMessage("파이어베이스 사용 가능량을 초과하였습니다.");
+      }
     };
 
     fetchContents();
@@ -44,9 +51,7 @@ export default function Contents({ title }: { title: string }) {
   } else
     return (
       <Wrapper>
-        <Text>
-          아직 작성중입니다. 이메일 구독을 하여 제일 먼저 글을 읽어보세요.
-        </Text>
+        <Text>{message}</Text>
       </Wrapper>
     );
 }

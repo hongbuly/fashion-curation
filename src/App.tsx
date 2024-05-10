@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import Contents from "./components/contents";
 import { v4 as uuidv4 } from "uuid";
+import Search from "./components/search";
 
 export interface IMenu {
   id: string;
@@ -138,35 +139,46 @@ const Subscribe = styled.button`
   }
 `;
 
+const BigBox = styled.div`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
+
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
   const [selectMenu, setSelectMenu] = useState("24 ss women");
   const scrollViewRef = useRef<HTMLDivElement>(null);
+  const [selectSearch, setSelectSearch] = useState(false);
 
   const fetchMenu = async () => {
     const menusQuery = query(
       collection(db, "menus"),
       orderBy("createdAt", "desc")
     );
-    const snapshot = await getDocs(menusQuery);
-    const menus = snapshot.docs.map((doc) => {
-      const { title, createdAt } = doc.data();
-      return {
-        id: doc.id,
-        title,
-        createdAt,
-        selected: false,
-        onClick: () => {},
-      };
-    });
+    try {
+      const snapshot = await getDocs(menusQuery);
+      const menus = snapshot.docs.map((doc) => {
+        const { title, createdAt } = doc.data();
+        return {
+          id: doc.id,
+          title,
+          createdAt,
+          selected: false,
+          onClick: () => {},
+        };
+      });
 
-    setMenu(menus);
-    setSelectMenu(menus[2].title);
+      setMenu(menus);
+      setSelectMenu(menus[2].title);
+    } catch (e) {
+      console.log("Firebase Error : 파이어베이스 사용 가능량 초과");
+    }
   };
 
   useEffect(() => {
     fetchMenu();
-  }, []);
+  });
 
   const handleMenuClick = (menuTitle: string) => {
     setSelectMenu(menuTitle);
@@ -174,6 +186,8 @@ function App() {
     const selectedMenuIndex = menus.findIndex(
       (menu) => menu.title === menuTitle
     );
+
+    // selected menu move to center of window
     if (scrollViewRef.current?.scrollWidth) {
       const scrollLeft =
         (scrollViewRef.current?.scrollWidth / menus.length) * selectedMenuIndex;
@@ -196,7 +210,7 @@ function App() {
     const email = emailElement ? emailElement.value : "";
 
     if (email != "") {
-      const emailId = uuidv4();
+      const emailId = uuidv4(); // hash id
       setDoc(doc(db, "emails", emailId), { email: email });
       if (subscribe_text) {
         subscribe_text.innerText = "이메일 구독이 되었습니다.";
@@ -204,40 +218,58 @@ function App() {
     }
   };
 
+  const searchClick = async () => {
+    setSelectSearch(!selectSearch);
+  };
+
+  const goToHome = async () => {
+    setSelectSearch(false);
+  };
+
   return (
     <Wrapper>
       <GlobalStyles />
       <AppBar>
         <SizedBox />
-        <AppTitle>honghyun</AppTitle>
-        <Button>
+        <AppTitle onClick={goToHome}>honghyun</AppTitle>
+        <Button onClick={searchClick}>
           <MdOutlineSearch />
         </Button>
       </AppBar>
-      <ScrollMenu ref={scrollViewRef}>
-        {menus.map((menu) => (
-          <Menu
-            key={menu.id}
-            {...menu}
-            onClick={() => handleMenuClick(menu.title)}
-            selected={menu.title === selectMenu}
-          />
-        ))}
-      </ScrollMenu>
-      <ScrollView>
-        <ContentWrapper>
-          <Contents title={selectMenu} />
-        </ContentWrapper>
-        <BottomWrapper>
-          <SubscribeText id="subscribe_text">
-            이메일을 입력하고, 새로운 글을 놓치지 마세요.
-          </SubscribeText>
-          <EmailText id="email" type="text" placeholder="example@example.com" />
-          <Subscribe onClick={handleSubscribeClick}>
-            뉴스레터 구독하기
-          </Subscribe>
-        </BottomWrapper>
-      </ScrollView>
+      {selectSearch ? (
+        <Search menus={menus} />
+      ) : (
+        <BigBox>
+          <ScrollMenu ref={scrollViewRef}>
+            {menus.map((menu) => (
+              <Menu
+                key={menu.id}
+                {...menu}
+                onClick={() => handleMenuClick(menu.title)}
+                selected={menu.title === selectMenu}
+              />
+            ))}
+          </ScrollMenu>
+          <ScrollView>
+            <ContentWrapper>
+              <Contents title={selectMenu} />
+            </ContentWrapper>
+            <BottomWrapper>
+              <SubscribeText id="subscribe_text">
+                이메일을 입력하고, 새로운 글을 놓치지 마세요.
+              </SubscribeText>
+              <EmailText
+                id="email"
+                type="text"
+                placeholder="example@example.com"
+              />
+              <Subscribe onClick={handleSubscribeClick}>
+                뉴스레터 구독하기
+              </Subscribe>
+            </BottomWrapper>
+          </ScrollView>
+        </BigBox>
+      )}
     </Wrapper>
   );
 }
