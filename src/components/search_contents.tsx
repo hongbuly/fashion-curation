@@ -59,8 +59,8 @@ const SearchContents: React.FC<SearchItem> = ({ title, contents, images }) => {
       ) : null}
 
       <TextBox>
-        <Title>${title}</Title>
-        <Text>${contents}</Text>
+        <Title>{title}</Title>
+        <Text dangerouslySetInnerHTML={{ __html: contents }}></Text>
       </TextBox>
     </Wrapper>
   );

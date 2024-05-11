@@ -73,7 +73,7 @@ export default function Search({ menus }: { menus: IMenu[] }) {
               keyword.includes(item)
             );
             if (Array.isArray(correct) && correct.length !== 0) {
-              const allImage = ref(storage, menus[0].title + "/");
+              const allImage = ref(storage, menus[mIndex].title + "/");
 
               listAll(allImage).then(async (res) => {
                 const { items } = res;

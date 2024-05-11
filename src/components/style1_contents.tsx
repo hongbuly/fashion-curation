@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import LoadingScreen from "./loading-screen";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
 import { storage } from "../firebase";
@@ -11,6 +11,17 @@ export interface Urls {
   name: string;
   url: string;
 }
+
+const transform_anim = keyframes`
+  from {
+    transform: translate(500%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+`;
 
 const UpNextBox = styled.div`
   display: flex;
@@ -62,6 +73,7 @@ const Text = styled.p`
   font-family: "Nanum Myeongjo", serif;
   white-space: pre-wrap;
   font-size: 17px;
+  animation: ${transform_anim} 3s ease-in-out forwards;
 `;
 
 const ImgSliderBox = styled.div`
@@ -146,41 +158,41 @@ export default function Style1Contents({
     });
   };
 
-  useEffect(() => {
-    const init = async () => {
-      const contentsQuery = doc(db, title, index.toString());
-      const snapshot = await getDoc(contentsQuery);
-      if (snapshot.exists()) {
-        const { contents } = snapshot.data();
-        setContents(contents);
+  const init = async () => {
+    const contentsQuery = doc(db, title, index.toString());
+    const snapshot = await getDoc(contentsQuery);
+    if (snapshot.exists()) {
+      const { contents } = snapshot.data();
+      setContents(contents);
+    }
+
+    const allImage = ref(storage, title + "/");
+
+    listAll(allImage).then(async (res) => {
+      const { items } = res;
+      const _urls = await Promise.all(
+        items.map((item) => getDownloadURL(item))
+      );
+
+      const combine: Urls[] = [];
+      const combine_group: Urls[] = [];
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].name.includes(`group${index}`))
+          combine_group.push({ name: items[i].name, url: _urls[i] });
+        else if (items[i].name.includes(`g${index}`))
+          combine.push({ name: items[i].name, url: _urls[i] });
       }
 
-      const allImage = ref(storage, title + "/");
+      setImageList(combine);
+      setImageListGroup(combine_group);
+      setLoading(false);
+    });
+  };
 
-      listAll(allImage).then(async (res) => {
-        const { items } = res;
-        const _urls = await Promise.all(
-          items.map((item) => getDownloadURL(item))
-        );
+  init();
 
-        const combine: Urls[] = [];
-        const combine_group: Urls[] = [];
-
-        for (let i = 0; i < items.length; i++) {
-          if (items[i].name.includes(`group${index}`))
-            combine_group.push({ name: items[i].name, url: _urls[i] });
-          else if (items[i].name.includes(`g${index}`))
-            combine.push({ name: items[i].name, url: _urls[i] });
-        }
-
-        setImageList(combine);
-        setImageListGroup(combine_group);
-        setLoading(false);
-      });
-    };
-
-    init();
-
+  useEffect(() => {
     if (currentImgIndex === 0) {
       setCurrentImgIndex(imageList.length);
       setTimeout(function () {
@@ -198,7 +210,7 @@ export default function Style1Contents({
         });
       }, 500);
     }
-  }, [currentImgIndex, imageList.length, index, title]);
+  }, [currentImgIndex, imageList.length]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -279,7 +291,7 @@ export default function Style1Contents({
         </SliderButtonBox>
       </ImgSliderBox>
       <TextBox>
-        <Text dangerouslySetInnerHTML={{ __html: contents }}></Text>
+        <Text dangerouslySetInnerHTML={{ __html: contents }} />
       </TextBox>
     </UpNextBox>
   );

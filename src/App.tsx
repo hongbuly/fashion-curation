@@ -1,6 +1,6 @@
 import styled, { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { db } from "./firebase";
 import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
@@ -176,9 +176,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    fetchMenu();
-  });
+  fetchMenu();
 
   const handleMenuClick = (menuTitle: string) => {
     setSelectMenu(menuTitle);
