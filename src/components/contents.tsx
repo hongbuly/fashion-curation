@@ -35,6 +35,7 @@ export default function Contents({ title }: { title: string }) {
       const size = snapshot.size;
       setSize(size);
     } catch (e) {
+      console.log(e);
       setMessage("파이어베이스 사용 가능량을 초과하였습니다.");
     }
   };

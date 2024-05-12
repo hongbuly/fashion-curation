@@ -1,8 +1,7 @@
 import styled, { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "./firebase";
-import { MdOutlineSearch } from "react-icons/md";
 import Menu from "./components/menu";
 import {
   collection,
@@ -14,6 +13,7 @@ import {
 } from "firebase/firestore";
 import Contents from "./components/contents";
 import { v4 as uuidv4 } from "uuid";
+import { MdOutlineSearch } from "react-icons/md";
 import Search from "./components/search";
 
 export interface IMenu {
@@ -139,12 +139,6 @@ const Subscribe = styled.button`
   }
 `;
 
-const BigBox = styled.div`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
   const [selectMenu, setSelectMenu] = useState("24 ss women");
@@ -170,13 +164,16 @@ function App() {
       });
 
       setMenu(menus);
-      setSelectMenu(menus[2].title);
+      setSelectMenu(menus[0].title);
     } catch (e) {
       console.log("Firebase Error : 파이어베이스 사용 가능량 초과");
     }
   };
 
-  fetchMenu();
+  useEffect(() => {
+    console.log("App useEffect!");
+    fetchMenu();
+  }, []);
 
   const handleMenuClick = (menuTitle: string) => {
     setSelectMenu(menuTitle);
@@ -234,39 +231,37 @@ function App() {
           <MdOutlineSearch />
         </Button>
       </AppBar>
+      <ScrollMenu ref={scrollViewRef}>
+        {menus.map((menu) => (
+          <Menu
+            key={menu.id}
+            {...menu}
+            onClick={() => handleMenuClick(menu.title)}
+            selected={menu.title === selectMenu}
+          />
+        ))}
+      </ScrollMenu>
       {selectSearch ? (
         <Search menus={menus} />
       ) : (
-        <BigBox>
-          <ScrollMenu ref={scrollViewRef}>
-            {menus.map((menu) => (
-              <Menu
-                key={menu.id}
-                {...menu}
-                onClick={() => handleMenuClick(menu.title)}
-                selected={menu.title === selectMenu}
-              />
-            ))}
-          </ScrollMenu>
-          <ScrollView>
-            <ContentWrapper>
-              <Contents title={selectMenu} />
-            </ContentWrapper>
-            <BottomWrapper>
-              <SubscribeText id="subscribe_text">
-                이메일을 입력하고, 새로운 글을 놓치지 마세요.
-              </SubscribeText>
-              <EmailText
-                id="email"
-                type="text"
-                placeholder="example@example.com"
-              />
-              <Subscribe onClick={handleSubscribeClick}>
-                뉴스레터 구독하기
-              </Subscribe>
-            </BottomWrapper>
-          </ScrollView>
-        </BigBox>
+        <ScrollView>
+          <ContentWrapper>
+            <Contents title={selectMenu} />
+          </ContentWrapper>
+          <BottomWrapper>
+            <SubscribeText id="subscribe_text">
+              이메일을 입력하고, 새로운 글을 놓치지 마세요.
+            </SubscribeText>
+            <EmailText
+              id="email"
+              type="text"
+              placeholder="example@example.com"
+            />
+            <Subscribe onClick={handleSubscribeClick}>
+              뉴스레터 구독하기
+            </Subscribe>
+          </BottomWrapper>
+        </ScrollView>
       )}
     </Wrapper>
   );

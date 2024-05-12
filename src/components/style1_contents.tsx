@@ -148,6 +148,15 @@ export default function Style1Contents({
       transform: `translateX(-${currentImgIndex + 1}00%)`,
       transition: `all 0.4s ease-in-out`,
     });
+    if (currentImgIndex === imageList.length) {
+      setCurrentImgIndex(1);
+      setTimeout(function () {
+        setStyle({
+          transform: `translateX(-100%)`,
+          transition: `0ms`,
+        });
+      }, 500);
+    }
   };
 
   const prevSlide = () => {
@@ -156,6 +165,15 @@ export default function Style1Contents({
       transform: `translateX(-${currentImgIndex - 1}00%)`,
       transition: `all 0.4s ease-in-out`,
     });
+    if (currentImgIndex === 1) {
+      setCurrentImgIndex(imageList.length);
+      setTimeout(function () {
+        setStyle({
+          transform: `translateX(-${imageList.length}00%)`,
+          transition: `0ms`,
+        });
+      }, 500);
+    }
   };
 
   const init = async () => {
@@ -190,27 +208,9 @@ export default function Style1Contents({
     });
   };
 
-  init();
-
   useEffect(() => {
-    if (currentImgIndex === 0) {
-      setCurrentImgIndex(imageList.length);
-      setTimeout(function () {
-        setStyle({
-          transform: `translateX(-${imageList.length}00%)`,
-          transition: `0ms`,
-        });
-      }, 500);
-    } else if (currentImgIndex === imageList.length + 1) {
-      setCurrentImgIndex(1);
-      setTimeout(function () {
-        setStyle({
-          transform: `translateX(-100%)`,
-          transition: `0ms`,
-        });
-      }, 500);
-    }
-  }, [currentImgIndex, imageList.length]);
+    init();
+  }, []);
 
   if (isLoading) {
     return <LoadingScreen />;
