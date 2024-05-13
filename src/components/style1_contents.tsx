@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
-import LoadingScreen from "./loading-screen";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
 import { storage } from "../firebase";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./../firebase";
+import LoadingScreen from "./loading-screen";
 
 export interface Urls {
   name: string;
@@ -122,8 +122,8 @@ export default function Style1Contents({
   title: string;
   index: number;
 }) {
+  const [isLoading, setLoading] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setLoading] = useState(true);
   const [contents, setContents] = useState("");
 
   const [imageList, setImageList] = useState<Urls[]>([]);
@@ -177,6 +177,7 @@ export default function Style1Contents({
   };
 
   const init = async () => {
+    setLoading(true);
     const contentsQuery = doc(db, title, index.toString());
     const snapshot = await getDoc(contentsQuery);
     if (snapshot.exists()) {
@@ -214,6 +215,10 @@ export default function Style1Contents({
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (imageList[0] == null) {
+    return <Text>error</Text>;
   }
 
   return (

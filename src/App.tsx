@@ -231,7 +231,7 @@ function App() {
           <MdOutlineSearch />
         </Button>
       </AppBar>
-      <ScrollMenu ref={scrollViewRef}>
+      <ScrollMenu onClick={goToHome} ref={scrollViewRef}>
         {menus.map((menu) => (
           <Menu
             key={menu.id}
@@ -242,7 +242,11 @@ function App() {
         ))}
       </ScrollMenu>
       {selectSearch ? (
-        <Search menus={menus} />
+        <Search
+          handleMenuClick={handleMenuClick}
+          setSelectSearch={setSelectSearch}
+          menus={menus}
+        />
       ) : (
         <ScrollView>
           <ContentWrapper>

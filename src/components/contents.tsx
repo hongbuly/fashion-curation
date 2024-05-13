@@ -39,7 +39,6 @@ export default function Contents({ title }: { title: string }) {
       setMessage("파이어베이스 사용 가능량을 초과하였습니다.");
     }
   };
-
   fetchContents();
 
   if (size != 0) {

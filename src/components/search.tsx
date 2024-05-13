@@ -7,6 +7,7 @@ import { getDownloadURL, listAll, ref } from "firebase/storage";
 import { Urls } from "./style1_contents";
 import { useState } from "react";
 import SearchContents from "./search_contents";
+import LoadingScreen from "./loading-screen";
 
 export interface SearchItem {
   title: string;
@@ -18,14 +19,18 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  margin: 40px 0px;
   width: 100%;
+  height: 87vh;
 `;
 
 const ScrollView = styled.div`
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+  align-items: center;
   white-space: nowrap;
+  width: 100%;
 `;
 
 const SearchBox = styled.div`
@@ -34,9 +39,12 @@ const SearchBox = styled.div`
   height: 30px;
   width: 60%;
   border: 1px solid black;
-  margin-top: 10px;
+  margin-bottom: 10px;
   align-items: center;
   padding-left: 10px;
+  @media screen and (min-width: 1300px) {
+    width: 40%;
+  }
 `;
 
 const SearchText = styled.input`
@@ -45,15 +53,32 @@ const SearchText = styled.input`
   border: 0px;
 `;
 
-export default function Search({ menus }: { menus: IMenu[] }) {
-  const [searchItem, setSearchItem] = useState<SearchItem[]>([]);
+const Text = styled.p`
+  width: inherit;
+  font-family: "Nanum Myeongjo", serif;
+  white-space: pre-wrap;
+  font-size: 17px;
+  margin-bottom: 50px;
+`;
+
+export default function Search({
+  handleMenuClick,
+  setSelectSearch,
+  menus,
+}: {
+  handleMenuClick: (menuTitle: string) => void;
+  setSelectSearch: React.Dispatch<React.SetStateAction<boolean>>;
+  menus: IMenu[];
+}) {
+  const [isLoading, setLoading] = useState(false);
+  const [searchItem, setSearchItem] = useState<SearchItem[] | null>(null);
 
   const showSearch = async (e: React.KeyboardEvent) => {
+    setLoading(true);
     if (e.key === "Enter") {
-      const searchElement = document.getElementById(
-        "search"
-      ) as HTMLInputElement | null;
-      const search = searchElement ? searchElement.value : "";
+      console.log("Enter!");
+      const searchElement = e.target as HTMLInputElement;
+      const search = searchElement.value;
       const splitSearch = search.split(" ");
 
       const sItems: SearchItem[] = [];
@@ -64,7 +89,7 @@ export default function Search({ menus }: { menus: IMenu[] }) {
         const snapshot = await getDocs(menusQuery);
         const size = snapshot.size;
 
-        for (let index = 0; index < size; index++) {
+        for (let index = 1; index < size + 1; index++) {
           const contentsQuery = doc(db, menus[mIndex].title, index.toString());
           const snapshot2 = await getDoc(contentsQuery);
           if (snapshot2.exists()) {
@@ -75,33 +100,32 @@ export default function Search({ menus }: { menus: IMenu[] }) {
             if (Array.isArray(correct) && correct.length !== 0) {
               const allImage = ref(storage, menus[mIndex].title + "/");
 
-              listAll(allImage).then(async (res) => {
-                const { items } = res;
-                const _urls = await Promise.all(
-                  items.map((item) => getDownloadURL(item))
-                );
+              const res = await listAll(allImage);
+              const _urls = await Promise.all(
+                res.items.map((item) => getDownloadURL(item))
+              );
 
-                const combine: Urls[] = [];
+              const combine: Urls[] = [];
 
-                for (let i = 0; i < items.length; i++) {
-                  if (items[i].name.includes(`g${index}`))
-                    combine.push({ name: items[i].name, url: _urls[i] });
-                }
+              for (let i = 0; i < res.items.length; i++) {
+                if (res.items[i].name.includes(`g${index}`))
+                  combine.push({ name: res.items[i].name, url: _urls[i] });
+              }
 
-                const sItem: SearchItem = {
-                  title: menus[mIndex].title + "-" + index,
-                  contents: contents,
-                  images: combine,
-                };
-                sItems.push(sItem);
-              });
+              const sItem: SearchItem = {
+                title: menus[mIndex].title,
+                contents: contents,
+                images: combine,
+              };
+              sItems.push(sItem);
             }
           }
         }
       }
 
-      setSearchItem(sItems);
+      setSearchItem(sItems.length > 0 ? sItems : null);
     }
+    setLoading(false);
   };
 
   return (
@@ -116,11 +140,24 @@ export default function Search({ menus }: { menus: IMenu[] }) {
         />
       </SearchBox>
 
-      <ScrollView>
-        {searchItem.map((search) => (
-          <SearchContents key={search.title} {...search} />
-        ))}
-      </ScrollView>
+      {isLoading ? (
+        <LoadingScreen />
+      ) : (
+        <ScrollView>
+          {searchItem === null ? (
+            <Text>검색 결과가 없습니다.</Text>
+          ) : (
+            searchItem.map((search) => (
+              <SearchContents
+                handleMenuClick={handleMenuClick}
+                setSelectSearch={setSelectSearch}
+                key={search.title}
+                {...search}
+              />
+            ))
+          )}
+        </ScrollView>
+      )}
     </Wrapper>
   );
 }
