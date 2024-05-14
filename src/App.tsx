@@ -40,12 +40,18 @@ const SizedBox = styled.div`
   width: 1px;
 `;
 
+const AppBarMenu = styled.div`
+  position: absolute;
+  width: 100%;
+`;
+
 const AppBar = styled.div`
   height: fit-content;
   width: 100%;
   border-bottom: 1px solid black;
   display: flex;
   justify-content: space-between;
+  background-color: white;
 `;
 
 const AppTitle = styled.h1`
@@ -142,8 +148,15 @@ const Subscribe = styled.button`
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
   const [selectMenu, setSelectMenu] = useState("24 ss women");
-  const scrollViewRef = useRef<HTMLDivElement>(null);
+  const scrollMenuRef = useRef<HTMLDivElement>(null);
   const [selectSearch, setSelectSearch] = useState(false);
+
+  const scrollViewRef = useRef<HTMLDivElement>(null);
+  const prevScrollY = useRef(0);
+  const [style, setStyle] = useState({
+    transform: `translateY(0%)`,
+    transition: `0ms`,
+  });
 
   const fetchMenu = async () => {
     const menusQuery = query(
@@ -175,6 +188,30 @@ function App() {
     fetchMenu();
   }, []);
 
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (scrollViewRef.current?.scrollHeight) {
+        const moveOffset =
+          scrollViewRef.current?.scrollTop - prevScrollY.current;
+        if (moveOffset > 30) {
+          // scroll down animation
+          setStyle({
+            transform: `translateY(-100px)`,
+            transition: `all 1s ease-in-out`,
+          });
+        } else if (moveOffset < -30) {
+          // scroll up animation
+          setStyle({
+            transform: `translateY(0px)`,
+            transition: `all 1s ease-in-out`,
+          });
+        }
+        prevScrollY.current = scrollViewRef.current?.scrollTop;
+      }
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
+
   const handleMenuClick = (menuTitle: string) => {
     setSelectMenu(menuTitle);
 
@@ -183,15 +220,15 @@ function App() {
     );
 
     // selected menu move to center of window
-    if (scrollViewRef.current?.scrollWidth) {
+    if (scrollMenuRef.current?.scrollWidth) {
       const scrollLeft =
-        (scrollViewRef.current?.scrollWidth / menus.length) * selectedMenuIndex;
-      if (scrollViewRef.current && typeof scrollLeft === "number") {
+        (scrollMenuRef.current?.scrollWidth / menus.length) * selectedMenuIndex;
+      if (scrollMenuRef.current && typeof scrollLeft === "number") {
         if (scrollLeft > 170) {
-          scrollViewRef.current.scrollLeft =
-            scrollLeft - scrollViewRef.current?.scrollWidth / 6;
+          scrollMenuRef.current.scrollLeft =
+            scrollLeft - scrollMenuRef.current?.scrollWidth / 6;
         } else {
-          scrollViewRef.current.scrollLeft = 0;
+          scrollMenuRef.current.scrollLeft = 0;
         }
       }
     }
@@ -224,23 +261,26 @@ function App() {
   return (
     <Wrapper>
       <GlobalStyles />
-      <AppBar>
-        <SizedBox />
-        <AppTitle onClick={goToHome}>honghyun</AppTitle>
-        <Button onClick={searchClick}>
-          <MdOutlineSearch />
-        </Button>
-      </AppBar>
-      <ScrollMenu onClick={goToHome} ref={scrollViewRef}>
-        {menus.map((menu) => (
-          <Menu
-            key={menu.id}
-            {...menu}
-            onClick={() => handleMenuClick(menu.title)}
-            selected={menu.title === selectMenu}
-          />
-        ))}
-      </ScrollMenu>
+      <AppBarMenu style={style}>
+        <AppBar>
+          <SizedBox />
+          <AppTitle onClick={goToHome}>honghyun</AppTitle>
+          <Button onClick={searchClick}>
+            <MdOutlineSearch />
+          </Button>
+        </AppBar>
+        <ScrollMenu onClick={goToHome} ref={scrollMenuRef}>
+          {menus.map((menu) => (
+            <Menu
+              key={menu.id}
+              {...menu}
+              onClick={() => handleMenuClick(menu.title)}
+              selected={menu.title === selectMenu}
+            />
+          ))}
+        </ScrollMenu>
+      </AppBarMenu>
+
       {selectSearch ? (
         <Search
           handleMenuClick={handleMenuClick}
@@ -248,7 +288,7 @@ function App() {
           menus={menus}
         />
       ) : (
-        <ScrollView>
+        <ScrollView ref={scrollViewRef}>
           <ContentWrapper>
             <Contents title={selectMenu} />
           </ContentWrapper>

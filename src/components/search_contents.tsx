@@ -1,5 +1,16 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { Urls } from "./style1_contents";
+
+const transform_anim = keyframes`
+  from {
+    transform: translate(500%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+`;
 
 const Wrapper = styled.div`
   display: flex;
@@ -15,6 +26,7 @@ const Wrapper = styled.div`
   @media screen and (max-width: 700px) {
     width: 95%;
   }
+  animation: ${transform_anim} 3s ease-in-out forwards;
 `;
 
 const ImageBox = styled.div`
@@ -74,6 +86,7 @@ export default function SearchContents({
 }: {
   handleMenuClick: (menuTitle: string) => void;
   setSelectSearch: React.Dispatch<React.SetStateAction<boolean>>;
+  key_index: number;
   title: string;
   contents: string;
   images: Urls[];

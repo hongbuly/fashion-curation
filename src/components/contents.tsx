@@ -19,6 +19,7 @@ const Text = styled.p`
   font-family: "Nanum Myeongjo", serif;
   white-space: pre-wrap;
   font-size: 17px;
+  margin-top: 100px;
   margin-bottom: 50px;
 `;
 

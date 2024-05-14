@@ -28,6 +28,7 @@ const UpNextBox = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 20%;
+  margin-top: 50px;
   @media screen and (min-width: 1200px) {
     flex-direction: row;
   }

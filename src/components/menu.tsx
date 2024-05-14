@@ -7,7 +7,7 @@ const Wrapper = styled.div<{ selected: boolean }>`
   height: 30px;
   border-bottom: ${(props) =>
     props.selected ? "3px solid black" : "1px solid grey"};
-  background: #fff;
+  background: transparent;
   font-size: 16px;
   line-height: 30px;
   text-align: center;

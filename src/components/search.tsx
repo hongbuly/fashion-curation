@@ -10,6 +10,7 @@ import SearchContents from "./search_contents";
 import LoadingScreen from "./loading-screen";
 
 export interface SearchItem {
+  key_index: number;
   title: string;
   contents: string;
   images: Urls[];
@@ -42,6 +43,8 @@ const SearchBox = styled.div`
   margin-bottom: 10px;
   align-items: center;
   padding-left: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
   @media screen and (min-width: 1300px) {
     width: 40%;
   }
@@ -53,8 +56,7 @@ const SearchText = styled.input`
   border: 0px;
 `;
 
-const Text = styled.p`
-  width: inherit;
+const ResultText = styled.p`
   font-family: "Nanum Myeongjo", serif;
   white-space: pre-wrap;
   font-size: 17px;
@@ -82,6 +84,8 @@ export default function Search({
       const splitSearch = search.split(" ");
 
       const sItems: SearchItem[] = [];
+
+      let key_index = 1;
 
       // TODO : splitSearch 중 keyword가 겹치는 글들 보여주기
       for (let mIndex = 0; mIndex < menus.length; mIndex++) {
@@ -113,6 +117,7 @@ export default function Search({
               }
 
               const sItem: SearchItem = {
+                key_index: key_index++,
                 title: menus[mIndex].title,
                 contents: contents,
                 images: combine,
@@ -145,13 +150,13 @@ export default function Search({
       ) : (
         <ScrollView>
           {searchItem === null ? (
-            <Text>검색 결과가 없습니다.</Text>
+            <ResultText>검색 결과가 없습니다.</ResultText>
           ) : (
             searchItem.map((search) => (
               <SearchContents
                 handleMenuClick={handleMenuClick}
                 setSelectSearch={setSelectSearch}
-                key={search.title}
+                key={search.key_index}
                 {...search}
               />
             ))
