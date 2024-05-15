@@ -43,6 +43,7 @@ const SizedBox = styled.div`
 const AppBarMenu = styled.div`
   position: absolute;
   width: 100%;
+  z-index: 1000;
 `;
 
 const AppBar = styled.div`
@@ -87,7 +88,7 @@ const Button = styled.button`
 const ScrollMenu = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
-  height: 150px;
+  height: 50px;
   white-space: nowrap;
   font-size: 0;
   &::-webkit-scrollbar {

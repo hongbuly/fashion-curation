@@ -21,7 +21,8 @@ const Wrapper = styled.div`
   align-items: center;
   flex-direction: column;
   width: 100%;
-  height: 87vh;
+  height: 80vh;
+  margin-top: 150px;
 `;
 
 const ScrollView = styled.div`
