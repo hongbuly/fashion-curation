@@ -3,8 +3,6 @@ import styled, { keyframes } from "styled-components";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
 import { storage } from "../firebase";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./../firebase";
 import LoadingScreen from "./loading-screen";
 
 export interface Urls {
@@ -119,13 +117,14 @@ const ImgListBox = styled.div`
 export default function Style1Contents({
   title,
   index,
+  content,
 }: {
   title: string;
   index: number;
+  content: string;
 }) {
   const [isLoading, setLoading] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [contents, setContents] = useState("");
 
   const [imageList, setImageList] = useState<Urls[]>([]);
   const [imageListGroup, setImageListGroup] = useState<Urls[]>([]);
@@ -179,15 +178,8 @@ export default function Style1Contents({
 
   const init = async () => {
     setLoading(true);
-    const contentsQuery = doc(db, title, index.toString());
-    const snapshot = await getDoc(contentsQuery);
-    if (snapshot.exists()) {
-      const { contents } = snapshot.data();
-      setContents(contents);
-    }
 
     const allImage = ref(storage, title + "/");
-
     listAll(allImage).then(async (res) => {
       const { items } = res;
       const _urls = await Promise.all(
@@ -212,7 +204,7 @@ export default function Style1Contents({
 
   useEffect(() => {
     init();
-  }, []);
+  }, [title]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -297,7 +289,7 @@ export default function Style1Contents({
         </SliderButtonBox>
       </ImgSliderBox>
       <TextBox>
-        <Text dangerouslySetInnerHTML={{ __html: contents }} />
+        <Text dangerouslySetInnerHTML={{ __html: content }} />
       </TextBox>
     </UpNextBox>
   );

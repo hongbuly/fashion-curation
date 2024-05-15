@@ -148,7 +148,7 @@ const Subscribe = styled.button`
 
 function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
-  const [selectMenu, setSelectMenu] = useState("24 ss women");
+  const [selectMenu, setSelectMenu] = useState("");
   const scrollMenuRef = useRef<HTMLDivElement>(null);
   const [selectSearch, setSelectSearch] = useState(false);
 
