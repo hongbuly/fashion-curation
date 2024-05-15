@@ -39,7 +39,7 @@ const SearchBox = styled.div`
   display: flex;
   flex-direction: row;
   height: 30px;
-  width: 60%;
+  width: 55%;
   border: 1px solid black;
   margin-bottom: 10px;
   align-items: center;
@@ -48,6 +48,9 @@ const SearchBox = styled.div`
   padding-bottom: 20px;
   @media screen and (min-width: 1300px) {
     width: 40%;
+  }
+  @media screen and (max-width: 700px) {
+    width: 95%;
   }
 `;
 
