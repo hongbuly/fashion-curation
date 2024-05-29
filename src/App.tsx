@@ -15,6 +15,9 @@ import Contents from "./components/contents";
 import { v4 as uuidv4 } from "uuid";
 import { MdOutlineSearch } from "react-icons/md";
 import Search from "./components/search";
+import { useDispatch, useSelector } from "react-redux";
+import { setFalse, toggle } from "./stores/selectSearch";
+import { AppDispatch, RootState } from "./store";
 
 export interface IMenu {
   id: string;
@@ -150,7 +153,11 @@ function App() {
   const [menus, setMenu] = useState<IMenu[]>([]);
   const [selectMenu, setSelectMenu] = useState("");
   const scrollMenuRef = useRef<HTMLDivElement>(null);
-  const [selectSearch, setSelectSearch] = useState(false);
+  // const [selectSearch, setSelectSearch] = useState(false);
+  const selectSearch = useSelector(
+    (state: RootState) => state.selectSearch.value
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
   const scrollViewRef = useRef<HTMLDivElement>(null);
   const prevScrollY = useRef(0);
@@ -252,11 +259,13 @@ function App() {
   };
 
   const searchClick = async () => {
-    setSelectSearch(!selectSearch);
+    // setSelectSearch(!selectSearch);
+    dispatch(toggle());
   };
 
   const goToHome = async () => {
-    setSelectSearch(false);
+    // setSelectSearch(false);
+    dispatch(setFalse());
   };
 
   return (
@@ -283,11 +292,7 @@ function App() {
       </AppBarMenu>
 
       {selectSearch ? (
-        <Search
-          handleMenuClick={handleMenuClick}
-          setSelectSearch={setSelectSearch}
-          menus={menus}
-        />
+        <Search handleMenuClick={handleMenuClick} menus={menus} />
       ) : (
         <ScrollView ref={scrollViewRef}>
           <ContentWrapper>

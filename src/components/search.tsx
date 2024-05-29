@@ -69,11 +69,9 @@ const ResultText = styled.p`
 
 export default function Search({
   handleMenuClick,
-  setSelectSearch,
   menus,
 }: {
   handleMenuClick: (menuTitle: string) => void;
-  setSelectSearch: React.Dispatch<React.SetStateAction<boolean>>;
   menus: IMenu[];
 }) {
   const [isLoading, setLoading] = useState(false);
@@ -159,7 +157,6 @@ export default function Search({
             searchItem.map((search) => (
               <SearchContents
                 handleMenuClick={handleMenuClick}
-                setSelectSearch={setSelectSearch}
                 key={search.key_index}
                 {...search}
               />
