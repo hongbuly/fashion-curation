@@ -18,14 +18,13 @@ import Search from "./components/search";
 import { useDispatch, useSelector } from "react-redux";
 import { setFalse, toggle } from "./stores/selectSearch";
 import { AppDispatch, RootState } from "./store";
-
-export interface IMenu {
-  id: string;
-  title: string;
-  createdAt: number;
-  selected: boolean;
-  onClick: () => void;
-}
+import {
+  downCurrentScroll,
+  resetScroll,
+  upCurrentScroll,
+} from "./stores/scrollOffset";
+import { setMenus } from "./stores/menus";
+import { setSelectMenu } from "./stores/selectMenu";
 
 const GlobalStyles = createGlobalStyle`
   ${reset};
@@ -150,16 +149,18 @@ const Subscribe = styled.button`
 `;
 
 function App() {
-  const [menus, setMenu] = useState<IMenu[]>([]);
-  const [selectMenu, setSelectMenu] = useState("");
+  const menus = useSelector((state: RootState) => state.menus.value);
+  const selectMenu = useSelector((state: RootState) => state.selectMenu.value);
   const scrollMenuRef = useRef<HTMLDivElement>(null);
-  // const [selectSearch, setSelectSearch] = useState(false);
   const selectSearch = useSelector(
     (state: RootState) => state.selectSearch.value
   );
   const dispatch = useDispatch<AppDispatch>();
 
   const scrollViewRef = useRef<HTMLDivElement>(null);
+  const scrollOffset = useSelector(
+    (state: RootState) => state.scrollOffset.value
+  );
   const prevScrollY = useRef(0);
   const [style, setStyle] = useState({
     transform: `translateY(0%)`,
@@ -184,7 +185,7 @@ function App() {
         };
       });
 
-      setMenu(menus);
+      dispatch(setMenus(menus));
       setSelectMenu(menus[0].title);
     } catch (e) {
       console.log("Firebase Error : 파이어베이스 사용 가능량 초과");
@@ -192,36 +193,16 @@ function App() {
   };
 
   useEffect(() => {
-    console.log("App useEffect!");
     fetchMenu();
+    dispatch(resetScroll());
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (scrollViewRef.current?.scrollHeight) {
-        const moveOffset =
-          scrollViewRef.current?.scrollTop - prevScrollY.current;
-        if (moveOffset > 30) {
-          // scroll down animation
-          setStyle({
-            transform: `translateY(-100px)`,
-            transition: `all 1s ease-in-out`,
-          });
-        } else if (moveOffset < -30) {
-          // scroll up animation
-          setStyle({
-            transform: `translateY(0px)`,
-            transition: `all 1s ease-in-out`,
-          });
-        }
-        prevScrollY.current = scrollViewRef.current?.scrollTop;
-      }
-    }, 500);
-    return () => clearInterval(id);
-  }, []);
+    handleMenuClick(selectMenu);
+  }, [selectMenu]);
 
   const handleMenuClick = (menuTitle: string) => {
-    setSelectMenu(menuTitle);
+    dispatch(setSelectMenu(menuTitle));
 
     const selectedMenuIndex = menus.findIndex(
       (menu) => menu.title === menuTitle
@@ -259,13 +240,43 @@ function App() {
   };
 
   const searchClick = async () => {
-    // setSelectSearch(!selectSearch);
     dispatch(toggle());
   };
 
   const goToHome = async () => {
-    // setSelectSearch(false);
     dispatch(setFalse());
+  };
+
+  const handleScroll = () => {
+    if (scrollViewRef.current?.scrollHeight) {
+      const moveOffset = scrollViewRef.current?.scrollTop - prevScrollY.current;
+      if (moveOffset > 30) {
+        // scroll down animation
+        setStyle({
+          transform: `translateY(-100px)`,
+          transition: `all 1s ease-in-out`,
+        });
+        prevScrollY.current = scrollViewRef.current?.scrollTop;
+
+        console.log(
+          `scroll : ${scrollViewRef.current?.scrollTop}, ${scrollOffset + 1}`
+        );
+        if (scrollViewRef.current?.scrollTop > (scrollOffset + 1) * 700) {
+          dispatch(upCurrentScroll());
+        }
+      } else if (moveOffset < -30) {
+        // scroll up animation
+        setStyle({
+          transform: `translateY(0px)`,
+          transition: `all 1s ease-in-out`,
+        });
+        prevScrollY.current = scrollViewRef.current?.scrollTop;
+
+        if (scrollViewRef.current?.scrollTop < (scrollOffset + 1) * 700) {
+          dispatch(downCurrentScroll());
+        }
+      }
+    }
   };
 
   return (
@@ -292,9 +303,9 @@ function App() {
       </AppBarMenu>
 
       {selectSearch ? (
-        <Search handleMenuClick={handleMenuClick} menus={menus} />
+        <Search />
       ) : (
-        <ScrollView ref={scrollViewRef}>
+        <ScrollView ref={scrollViewRef} onScroll={handleScroll}>
           <ContentWrapper>
             <Contents title={selectMenu} />
           </ContentWrapper>

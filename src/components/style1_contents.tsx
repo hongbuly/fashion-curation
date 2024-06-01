@@ -1,25 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
 import { storage } from "../firebase";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import LoadingScreen from "./loading-screen";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store";
+import { useDispatch } from "react-redux";
+import { resetScroll } from "../stores/scrollOffset";
 
 export interface Urls {
   name: string;
   url: string;
 }
-
-const transform_anim = keyframes`
-  from {
-    transform: translate(500%, 0);
-    opacity: 0;
-  }
-  to {
-    transform: translate(0, 0);
-    opacity: 1;
-  }
-`;
 
 const UpNextBox = styled.div`
   display: flex;
@@ -72,7 +65,6 @@ const Text = styled.p`
   font-family: "Nanum Myeongjo", serif;
   white-space: pre-wrap;
   font-size: 17px;
-  animation: ${transform_anim} 3s ease-in-out forwards;
 `;
 
 const ImgSliderBox = styled.div`
@@ -135,12 +127,22 @@ export default function Style1Contents({
     transition: `all 0.4s ease-in-out`,
   });
 
+  const [textStyle, setTextStyle] = useState({
+    transform: `translateX(300%)`,
+    transition: `0ms`,
+  });
+
+  const [show, setShow] = useState(false);
+
   // For Mobile
   const mref = useRef<HTMLDivElement>(null);
   const [touch, setTouch] = useState({
     start: 0,
     end: 0,
   });
+
+  // For Scroll Event
+  const dispatch = useDispatch<AppDispatch>();
 
   const nextSlide = () => {
     setCurrentImgIndex(currentImgIndex + 1);
@@ -198,6 +200,7 @@ export default function Style1Contents({
 
       setImageList(combine);
       setImageListGroup(combine_group);
+      dispatch(resetScroll());
       setLoading(false);
     });
   };
@@ -205,6 +208,27 @@ export default function Style1Contents({
   useEffect(() => {
     init();
   }, [title]);
+
+  const scrollOffset = useSelector(
+    (state: RootState) => state.scrollOffset.value
+  );
+
+  useEffect(() => {
+    if (scrollOffset + 1 == index && !show) {
+      console.log(`test : ${scrollOffset}`);
+      setTextStyle({
+        transform: `translateX(0)`,
+        transition: `all 3s ease-in-out forwards`,
+      });
+      setShow(true);
+    } else if (scrollOffset + 1 == index) {
+      setTextStyle({
+        transform: `translateX(300%)`,
+        transition: `0ms`,
+      });
+      setShow(false);
+    }
+  }, [scrollOffset]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -289,7 +313,7 @@ export default function Style1Contents({
         </SliderButtonBox>
       </ImgSliderBox>
       <TextBox>
-        <Text dangerouslySetInnerHTML={{ __html: content }} />
+        <Text style={textStyle} dangerouslySetInnerHTML={{ __html: content }} />
       </TextBox>
     </UpNextBox>
   );

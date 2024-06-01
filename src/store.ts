@@ -1,9 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import selectSearchReducer from "./stores/selectSearch";
+import scrollOffsetReducer from "./stores/scrollOffset";
+import menusReducer from "./stores/menus";
+import selectMenuReducer from "./stores/selectMenu";
 
 const store = configureStore({
   reducer: {
     selectSearch: selectSearchReducer,
+    scrollOffset: scrollOffsetReducer,
+    menus: menusReducer,
+    selectMenu: selectMenuReducer,
   },
 });
 

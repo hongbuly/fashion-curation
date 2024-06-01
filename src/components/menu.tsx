@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { IMenu } from "../App";
+import { IMenu } from "../stores/menus";
 
 const Wrapper = styled.div<{ selected: boolean }>`
   display: inline-block;

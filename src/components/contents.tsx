@@ -41,8 +41,6 @@ export default function Contents({ title }: { title: string }) {
           temp.push(contents);
         }
       }
-      console.log(title);
-      console.log(temp);
       setContents(temp.length > 0 ? temp : []);
     } catch (e) {
       console.log(e);

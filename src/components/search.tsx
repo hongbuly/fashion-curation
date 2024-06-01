@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { MdOutlineSearch } from "react-icons/md";
-import { IMenu } from "../App";
 import { collection, doc, getDoc, getDocs, query } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
@@ -8,6 +7,8 @@ import { Urls } from "./style1_contents";
 import { useState } from "react";
 import SearchContents from "./search_contents";
 import LoadingScreen from "./loading-screen";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 export interface SearchItem {
   key_index: number;
@@ -67,13 +68,8 @@ const ResultText = styled.p`
   margin-bottom: 50px;
 `;
 
-export default function Search({
-  handleMenuClick,
-  menus,
-}: {
-  handleMenuClick: (menuTitle: string) => void;
-  menus: IMenu[];
-}) {
+export default function Search() {
+  const menus = useSelector((state: RootState) => state.menus.value);
   const [isLoading, setLoading] = useState(false);
   const [searchItem, setSearchItem] = useState<SearchItem[] | null>(null);
 
@@ -155,11 +151,7 @@ export default function Search({
             <ResultText>검색 결과가 없습니다.</ResultText>
           ) : (
             searchItem.map((search) => (
-              <SearchContents
-                handleMenuClick={handleMenuClick}
-                key={search.key_index}
-                {...search}
-              />
+              <SearchContents key={search.key_index} {...search} />
             ))
           )}
         </ScrollView>

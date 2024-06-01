@@ -2,6 +2,7 @@ import styled, { keyframes } from "styled-components";
 import { Urls } from "./style1_contents";
 import { useDispatch } from "react-redux";
 import { setFalse } from "../stores/selectSearch";
+import { setSelectMenu } from "../stores/selectMenu";
 
 const transform_anim = keyframes`
   from {
@@ -80,12 +81,10 @@ const Text = styled.p`
 `;
 
 export default function SearchContents({
-  handleMenuClick,
   title,
   contents,
   images,
 }: {
-  handleMenuClick: (menuTitle: string) => void;
   key_index: number;
   title: string;
   contents: string;
@@ -94,8 +93,7 @@ export default function SearchContents({
   const dispatch = useDispatch();
 
   const clickSearch = () => {
-    handleMenuClick(title);
-    // setSelectSearch(false);
+    dispatch(setSelectMenu(title));
     dispatch(setFalse());
   };
 
